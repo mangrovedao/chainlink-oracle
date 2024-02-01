@@ -1,7 +1,7 @@
 type Pair @entity {
   id: Bytes!
-  base: String!
-  quote: String!
+  base: String
+  quote: String
 }
 
 type Price @entity {

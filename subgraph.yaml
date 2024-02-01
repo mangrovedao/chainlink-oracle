@@ -4,30 +4,20 @@ schema:
 dataSources:
   - kind: ethereum
     name: EACAggregatorProxy
-    network: arbitrum-one
+    network: matic
     source:
-      address: "0xd30e2101a97dcbAeBCBC04F14C3f624E67A35165"
       abi: EACAggregatorProxy
-      startBlock: 176399790
+      startBlock: 50410040
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - AnswerUpdated
-        - NewRound
-        - OwnershipTransferRequested
-        - OwnershipTransferred
       abis:
         - name: EACAggregatorProxy
           file: ./abis/EACAggregatorProxy.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
           handler: handleAnswerUpdated
-        - event: NewRound(indexed uint256,indexed address,uint256)
-          handler: handleNewRound
-        - event: OwnershipTransferRequested(indexed address,indexed address)
-          handler: handleOwnershipTransferRequested
-        - event: OwnershipTransferred(indexed address,indexed address)
-          handler: handleOwnershipTransferred
       file: ./src/eac-aggregator-proxy.ts
