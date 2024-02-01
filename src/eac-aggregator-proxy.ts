@@ -28,7 +28,7 @@ export const createPairOrFail = (address: Address): Pair => {
 
     pair.base = baseQuote[0];
     pair.quote = baseQuote[1];
-    log.info("create pair {}/{}", [pair.base, pair.quote]);
+    log.info("create pair {}/{}", [pair.base!, pair.quote!]);
 
     pair.save();
   }
