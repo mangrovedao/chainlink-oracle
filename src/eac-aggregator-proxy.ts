@@ -1,74 +1,62 @@
+import { Address, ethereum } from "@graphprotocol/graph-ts";
 import {
   AnswerUpdated as AnswerUpdatedEvent,
+  EACAggregatorProxy,
   NewRound as NewRoundEvent,
   OwnershipTransferRequested as OwnershipTransferRequestedEvent,
   OwnershipTransferred as OwnershipTransferredEvent
 } from "../generated/EACAggregatorProxy/EACAggregatorProxy"
 import {
-  AnswerUpdated,
-  NewRound,
-  OwnershipTransferRequested,
-  OwnershipTransferred
+  Pair, Price,
 } from "../generated/schema"
 
+export const getEventUniqueId = (event: ethereum.Event): string => {
+  return `${event.transaction.hash.toHex()}-${event.logIndex.toHex()}`;
+};
+
+export const getOrCreatePair = (address: Address): Pair => {
+  let pair = Pair.load(address);
+  if (!pair) {
+    pair = new Pair(address);
+
+    const contract = EACAggregatorProxy.bind(address);
+    const baseQuote = contract.description().replaceAll(' ', '').split('/');
+
+    pair.base = baseQuote[0];
+    pair.quote = baseQuote[1];
+
+    pair.save();
+  }
+
+  return pair;
+};
+
+
 export function handleAnswerUpdated(event: AnswerUpdatedEvent): void {
-  let entity = new AnswerUpdated(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.current = event.params.current
-  entity.roundId = event.params.roundId
-  entity.updatedAt = event.params.updatedAt
+  const pair = getOrCreatePair(event.address);
+  if (!pair) {
+    throw new Error("Missing pair");
+  }
 
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
+  const price = new Price(getEventUniqueId(event));
+  price.pair = pair.id;
+  price.price = event.params.current;
+  price.updatedAt = event.params.updatedAt;
+  price.blockNumber = event.block.number;
+  price.transactionHash = event.transaction.hash;
 
-  entity.save()
+  price.save();
 }
 
 export function handleNewRound(event: NewRoundEvent): void {
-  let entity = new NewRound(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.roundId = event.params.roundId
-  entity.startedBy = event.params.startedBy
-  entity.startedAt = event.params.startedAt
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
 }
 
 export function handleOwnershipTransferRequested(
   event: OwnershipTransferRequestedEvent
 ): void {
-  let entity = new OwnershipTransferRequested(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.from = event.params.from
-  entity.to = event.params.to
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
 }
 
 export function handleOwnershipTransferred(
   event: OwnershipTransferredEvent
 ): void {
-  let entity = new OwnershipTransferred(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.from = event.params.from
-  entity.to = event.params.to
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
 }

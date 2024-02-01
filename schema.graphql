@@ -1,37 +1,24 @@
-type AnswerUpdated @entity(immutable: true) {
+# type AnswerUpdated @entity(immutable: true) {
+#   id: Bytes!
+#   current: BigInt! # int256
+#   roundId: BigInt! # uint256
+#   updatedAt: BigInt! # uint256
+#   blockNumber: BigInt!
+#   blockTimestamp: BigInt!
+#   transactionHash: Bytes!
+# }
+
+type Pair @entity {
   id: Bytes!
-  current: BigInt! # int256
-  roundId: BigInt! # uint256
-  updatedAt: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
+  base: String!
+  quote: String!
 }
 
-type NewRound @entity(immutable: true) {
-  id: Bytes!
-  roundId: BigInt! # uint256
-  startedBy: Bytes! # address
-  startedAt: BigInt! # uint256
+type Price @entity {
+  id: String!
+  pair: Pair!
+  price: BigInt!
+  updatedAt: BigInt!
   blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type OwnershipTransferRequested @entity(immutable: true) {
-  id: Bytes!
-  from: Bytes! # address
-  to: Bytes! # address
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type OwnershipTransferred @entity(immutable: true) {
-  id: Bytes!
-  from: Bytes! # address
-  to: Bytes! # address
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
   transactionHash: Bytes!
 }
