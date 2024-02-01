@@ -2,6 +2,8 @@ type Pair @entity {
   id: Bytes!
   base: String
   quote: String
+
+  decimals: BigInt
 }
 
 type Price @entity {

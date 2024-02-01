@@ -11,13 +11,14 @@ import { BigInt, Address, ethereum } from "@graphprotocol/graph-ts"
 import { getEventUniqueId, handleAnswerUpdated } from "../src/eac-aggregator-proxy"
 import { createAnswerUpdatedEvent } from "./eac-aggregator-proxy-utils"
 
-const prepareOracle = (address: Address, description: string): void => {
+const prepareOracle = (address: Address, description: string, decimals: i32): void => {
   createMockedFunction(address, "description", "description():(string)").returns([ethereum.Value.fromString(description)]);
+  createMockedFunction(address, "decimals", "decimals():(uint8)").returns([ethereum.Value.fromI32(decimals)]);
 }
 
 const address = Address.fromString("0x0000000000000000000000000000000000000001");
 
-prepareOracle(address, "ETH / USD");
+prepareOracle(address, "ETH / USD", 8);
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
 
@@ -50,19 +51,9 @@ describe("Describe entity assertions", () => {
     assert.entityCount("Pair", 1);
     assert.entityCount("Price", 1);
 
-    assert.fieldEquals(
-      "Pair",
-      address.toHex(),
-      "base",
-      "ETH"
-    );
-
-    assert.fieldEquals(
-      "Pair",
-      address.toHex(),
-      "quote",
-      "USD"
-    );
+    assert.fieldEquals("Pair", address.toHex(), "base", "ETH");
+    assert.fieldEquals("Pair", address.toHex(), "quote", "USD");
+    assert.fieldEquals("Pair", address.toHex(), "decimals", "8");
 
     const priceId = getEventUniqueId(newAnswerUpdatedEvent);
 

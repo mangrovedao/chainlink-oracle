@@ -1,4 +1,4 @@
-import { Address, ethereum, log } from "@graphprotocol/graph-ts";
+import { Address, BigInt, ethereum, log } from "@graphprotocol/graph-ts";
 import {
   AnswerUpdated as AnswerUpdatedEvent,
   EACAggregatorProxy,
@@ -26,9 +26,11 @@ export const createPairOrFail = (address: Address): Pair => {
       return pair; 
     }
 
+    const decimals = contract.decimals();
+
+    pair.decimals = BigInt.fromI32(decimals);
     pair.base = baseQuote[0];
     pair.quote = baseQuote[1];
-    log.info("create pair {}/{}", [pair.base!, pair.quote!]);
 
     pair.save();
   }
@@ -45,7 +47,7 @@ export function handleAnswerUpdated(event: AnswerUpdatedEvent): void {
 
   const price = new Price(getEventUniqueId(event));
   const key = `${pair.base!}/${pair.quote!}`;
-  if (key !== "ETH/USD") {
+  if (key != "ETH/USD") {
     return;
   }
 
