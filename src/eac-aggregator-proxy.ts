@@ -19,16 +19,23 @@ export const createPairOrFail = (address: Address): Pair => {
     pair.save();
 
     const contract = EACAggregatorProxy.bind(address);
-    const description = contract.description();
-    const baseQuote = description.replaceAll(' ', '').split('/');
+    const description = contract.try_description();
+    if (description.reverted) {
+      return pair;
+    }
+
+    const baseQuote = description.value.replaceAll(' ', '').split('/');
 
     if (baseQuote.length != 2) {
       return pair; 
     }
 
-    const decimals = contract.decimals();
+    const decimals = contract.try_decimals();
+    if (decimals.reverted) {
+      return pair;
+    }
 
-    pair.decimals = BigInt.fromI32(decimals);
+    pair.decimals = BigInt.fromI32(decimals.value);
     pair.base = baseQuote[0];
     pair.quote = baseQuote[1];
 
